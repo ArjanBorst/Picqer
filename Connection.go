@@ -9,12 +9,11 @@ import (
 	"strconv"
 	"time"
 
-	HttpConn "github.com/arjanborst/core/connection"
 	Model "github.com/arjanborst/picqer/model"
 )
 
 type PicqerHttpConnection struct {
-	HttpConn.HttpConnection
+	HttpConn.httpconnection
 }
 
 func createNewRequest(url string) (*http.Response, error) {
@@ -64,11 +63,11 @@ func processRequest(resp *http.Response) ([]byte, error) {
 	return body, err
 }
 
-func GetPicklists() (Model.Picklists, error) {
-	return GetPicklistsByOffset(0)
+func (conn PicqerHttpConnection) GetPicklists() (Model.Picklists, error) {
+	return conn.GetPicklistsByOffset(0)
 }
 
-func GetPicklistsByOffset(offset int) (Model.Picklists, error) {
+func (conn PicqerHttpConnection) GetPicklistsByOffset(offset int) (Model.Picklists, error) {
 
 	_url := url + "/api/v1/picklists"
 
@@ -76,20 +75,15 @@ func GetPicklistsByOffset(offset int) (Model.Picklists, error) {
 		_url = _url + offsetUrl + strconv.Itoa(offset)
 	}
 
-	resp, err := createNewRequest(_url)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := processRequest(resp)
-	if err != nil {
-		return nil, err
+	conn.HttpConnection.CreateNewRequest(_url)
+	if conn.HttpConnection.Error() != nil {
+		return nil, conn.HttpConnection.Error()
 	}
 
 	picklists := Model.Picklists{}
-	json.Unmarshal(body, &picklists)
+	json.Unmarshal(conn.Result(), &picklists)
 
-	return picklists, err
+	return picklists, conn.HttpConnection.Error()
 }
 
 func GetShipments(idpicklist int) (Model.Shipments, error) {
