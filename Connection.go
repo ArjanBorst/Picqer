@@ -1,7 +1,6 @@
 package picqer
 
 import (
-	"Picqer/Model"
 	"encoding/json"
 	"errors"
 	"io"
@@ -9,7 +8,14 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	HttpConn "github.com/arjanborst/core/connection"
+	Model "github.com/arjanborst/picqer/model"
 )
+
+type PicqerHttpConnection struct {
+	HttpConn.HttpConnection
+}
 
 func createNewRequest(url string) (*http.Response, error) {
 	var req *http.Request

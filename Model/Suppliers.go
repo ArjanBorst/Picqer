@@ -1,4 +1,4 @@
-package Model
+package model
 
 // https://mholt.github.io/json-to-go/
 type Suppliers []struct {
