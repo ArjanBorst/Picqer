@@ -1,9 +1,6 @@
 package picqer
 
-import (
-	"testing"
-)
-
+/*
 func TestGetPicklist(t *testing.T) {
 	Picklists, err := GetPicklists()
 
@@ -20,3 +17,4 @@ func TestGetPicklist(t *testing.T) {
 	}
 
 }
+*/

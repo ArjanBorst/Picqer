@@ -2,69 +2,18 @@ package picqer
 
 import (
 	"encoding/json"
-	"errors"
-	"io"
-	"log"
-	"net/http"
 	"strconv"
-	"time"
 
+	"github.com/arjanborst/core/http"
 	Model "github.com/arjanborst/picqer/model"
 )
 
 type PicqerHttpConnection struct {
-	HttpConn.httpconnection
+	http.HttpConnection
 }
 
-func createNewRequest(url string) (*http.Response, error) {
-	var req *http.Request
-	var resp *http.Response
-	var err error
-
-	for retries := 0; retries < maxRetries; retries++ {
-
-		req, err = http.NewRequest("GET", url, nil)
-		if err == nil {
-			req.Header.Set("Accept", "application/json")
-			req.SetBasicAuth(username, password)
-			client := &http.Client{}
-			resp, err = client.Do(req)
-
-			if err == nil && resp.StatusCode == 200 {
-				return resp, nil
-			}
-		}
-
-		time.Sleep(delay)
-	}
-
-	log.Println("Retries exhausted, unable to retrieve picklists: " + url + " res:  " + resp.Status)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if resp != nil {
-		return nil, errors.New(resp.Status)
-	}
-
-	return nil, errors.New("unknown error occurred")
-}
-
-func processRequest(resp *http.Response) ([]byte, error) {
-
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		println("Error while retrieving data from picqer")
-	}
-
-	return body, err
-}
-
-func (conn PicqerHttpConnection) GetPicklists() (Model.Picklists, error) {
-	return conn.GetPicklistsByOffset(0)
+func (c PicqerHttpConnection) GetPicklists() (Model.Picklists, error) {
+	return c.GetPicklistsByOffset(0)
 }
 
 func (conn PicqerHttpConnection) GetPicklistsByOffset(offset int) (Model.Picklists, error) {
@@ -81,11 +30,12 @@ func (conn PicqerHttpConnection) GetPicklistsByOffset(offset int) (Model.Picklis
 	}
 
 	picklists := Model.Picklists{}
-	json.Unmarshal(conn.Result(), &picklists)
+	json.Unmarshal(conn.HttpConnection.Result(), &picklists)
 
 	return picklists, conn.HttpConnection.Error()
 }
 
+/*
 func GetShipments(idpicklist int) (Model.Shipments, error) {
 	resp, err := createNewRequest(url + "/api/v1/picklists/" + strconv.Itoa(idpicklist) + "/shipments")
 	if err != nil {
@@ -226,3 +176,4 @@ func GetPicqerOrders(offset int) ([]Model.PicqerOrder, error) {
 
 	return picqerOrder, err
 }
+*/
