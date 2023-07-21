@@ -1,4 +1,4 @@
-package picqer
+package daemon
 
 import (
 	"encoding/json"
