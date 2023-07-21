@@ -22,7 +22,7 @@ type PicqerDaemon struct {
 
 var mux = &sync.RWMutex{}
 
-func (c PicqerDaemon) Daemon() {
+func (c PicqerDaemon) Start() {
 	ticker := time.NewTicker(120 * time.Second)
 	quit := make(chan struct{})
 	pages := c.FirstLoadPages
