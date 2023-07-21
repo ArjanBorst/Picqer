@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/arjanborst/core/http"
+	"github.com/arjanborst/core/httpconn"
 	Model "github.com/arjanborst/picqer/model"
 )
 
 type PicqerHttpConnection struct {
-	http.HttpConnection
+	httpconn.HttpConnection
 }
 
 func (c PicqerHttpConnection) GetPicklists() (Model.Picklists, error) {
 	return c.GetPicklistsByOffset(0)
 }
 
-func (conn PicqerHttpConnection) GetPicklistsByOffset(offset int) (Model.Picklists, error) {
+func (c PicqerHttpConnection) GetPicklistsByOffset(offset int) (Model.Picklists, error) {
 
 	_url := url + "/api/v1/picklists"
 
@@ -24,37 +24,37 @@ func (conn PicqerHttpConnection) GetPicklistsByOffset(offset int) (Model.Picklis
 		_url = _url + offsetUrl + strconv.Itoa(offset)
 	}
 
-	conn.HttpConnection.CreateNewRequest(_url)
-	if conn.HttpConnection.Error() != nil {
-		return nil, conn.HttpConnection.Error()
+	c.HttpConnection.CreateNewRequest(_url)
+	if c.HttpConnection.Error() != nil {
+		return nil, c.HttpConnection.Error()
 	}
 
 	picklists := Model.Picklists{}
-	json.Unmarshal(conn.HttpConnection.Result(), &picklists)
+	json.Unmarshal(c.HttpConnection.Result(), &picklists)
 
-	return picklists, conn.HttpConnection.Error()
+	return picklists, c.HttpConnection.Error()
 }
 
-/*
-func GetShipments(idpicklist int) (Model.Shipments, error) {
-	resp, err := createNewRequest(url + "/api/v1/picklists/" + strconv.Itoa(idpicklist) + "/shipments")
-	if err != nil {
-		return nil, err
+func (c PicqerHttpConnection) GetShipments(idpicklist int) (Model.Shipments, error) {
+
+	_url := url + "/api/v1/picklists/" + strconv.Itoa(idpicklist) + "/shipments"
+
+	c.HttpConnection.CreateNewRequest(_url)
+	if c.HttpConnection.Error() != nil {
+		return nil, c.HttpConnection.Error()
 	}
 
-	body, err := processRequest(resp)
-
 	shipments := Model.Shipments{}
-	json.Unmarshal(body, &shipments)
+	json.Unmarshal(c.HttpConnection.Result(), &shipments)
 
-	return shipments, err
+	return shipments, c.HttpConnection.Error()
 }
 
-func GetPurchaseOrders() (Model.PurchaseOrders, error) {
-	return GetPurchaseOrdersByOffset(0)
+func (c PicqerHttpConnection) GetPurchaseOrders() (Model.PurchaseOrders, error) {
+	return c.GetPurchaseOrdersByOffset(0)
 }
 
-func GetPurchaseOrdersByOffset(offset int) (Model.PurchaseOrders, error) {
+func (c PicqerHttpConnection) GetPurchaseOrdersByOffset(offset int) (Model.PurchaseOrders, error) {
 
 	_url := url + "/api/v1/purchaseorders"
 
@@ -62,46 +62,36 @@ func GetPurchaseOrdersByOffset(offset int) (Model.PurchaseOrders, error) {
 		_url = _url + offsetUrl + strconv.Itoa(offset)
 	}
 
-	resp, err := createNewRequest(_url)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := processRequest(resp)
-	if err != nil {
-		return nil, err
+	c.HttpConnection.CreateNewRequest(_url)
+	if c.HttpConnection.Error() != nil {
+		return nil, c.HttpConnection.Error()
 	}
 
 	purchaseOrders := Model.PurchaseOrders{}
-	json.Unmarshal(body, &purchaseOrders)
+	json.Unmarshal(c.HttpConnection.Result(), &purchaseOrders)
 
 	return purchaseOrders, nil
 }
 
-func GetPurchaseOrder(idpurchaseorder int) (Model.PurchaseOrder, error) {
+func (c PicqerHttpConnection) GetPurchaseOrder(idpurchaseorder int) (Model.PurchaseOrder, error) {
 	_url := url + "/api/v1/purchaseorders/" + strconv.Itoa(idpurchaseorder)
 
-	resp, err := createNewRequest(_url)
-	if err != nil {
-		return Model.PurchaseOrder{}, err
-	}
-
-	body, err := processRequest(resp)
-	if err != nil {
-		return Model.PurchaseOrder{}, err
+	c.HttpConnection.CreateNewRequest(_url)
+	if c.HttpConnection.Error() != nil {
+		return Model.PurchaseOrder{}, c.HttpConnection.Error()
 	}
 
 	purchaseOrder := Model.PurchaseOrder{}
-	json.Unmarshal(body, &purchaseOrder)
+	json.Unmarshal(c.HttpConnection.Result(), &purchaseOrder)
 
 	return purchaseOrder, nil
 }
 
-func GetSuppliers() (Model.Suppliers, error) {
-	return GetSuppliersByOffset(0)
+func (c PicqerHttpConnection) GetSuppliers() (Model.Suppliers, error) {
+	return c.GetSuppliersByOffset(0)
 }
 
-func GetSuppliersByOffset(offset int) (Model.Suppliers, error) {
+func (c PicqerHttpConnection) GetSuppliersByOffset(offset int) (Model.Suppliers, error) {
 
 	_url := url + "/api/v1/suppliers"
 
@@ -109,27 +99,22 @@ func GetSuppliersByOffset(offset int) (Model.Suppliers, error) {
 		_url = _url + offsetUrl + strconv.Itoa(offset)
 	}
 
-	resp, err := createNewRequest(_url)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := processRequest(resp)
-	if err != nil {
-		return nil, err
+	c.HttpConnection.CreateNewRequest(_url)
+	if c.HttpConnection.Error() != nil {
+		return nil, c.HttpConnection.Error()
 	}
 
 	suppliers := Model.Suppliers{}
-	json.Unmarshal(body, &suppliers)
+	json.Unmarshal(c.HttpConnection.Result(), &suppliers)
 
 	return suppliers, nil
 }
 
-func GetProducts() (Model.Products, error) {
-	return GetProductsByOffset(0)
+func (c PicqerHttpConnection) GetProducts() (Model.Products, error) {
+	return c.GetProductsByOffset(0)
 }
 
-func GetProductsByOffset(offset int) (Model.Products, error) {
+func (c PicqerHttpConnection) GetProductsByOffset(offset int) (Model.Products, error) {
 
 	_url := url + "/api/v1/products"
 
@@ -137,43 +122,32 @@ func GetProductsByOffset(offset int) (Model.Products, error) {
 		_url = _url + offsetUrl + strconv.Itoa(offset)
 	}
 
-	resp, err := createNewRequest(_url)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := processRequest(resp)
-	if err != nil {
+	if err := c.HttpConnection.CreateNewRequest(_url); err != nil {
 		return nil, err
 	}
 
 	products := Model.Products{}
-	json.Unmarshal(body, &products)
+	json.Unmarshal(c.HttpConnection.Result(), &products)
 
 	return products, nil
 }
 
-func GetPicqerOrders(offset int) ([]Model.PicqerOrder, error) {
+func (c PicqerHttpConnection) GetPicqerOrders(offset ...int) ([]Model.PicqerOrder, error) {
 
 	_url := url + "/api/v1/orders/"
 
-	if offset > 0 {
-		_url = _url + offsetUrl + strconv.Itoa(offset*100)
+	if len(offset) > 0 && offset[0] > 0 {
+		_url = _url + offsetUrl + strconv.Itoa(offset[0]*100)
 	}
 
-	resp, err := createNewRequest(_url)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := processRequest(resp)
-	if err != nil {
+	if err := c.HttpConnection.CreateNewRequest(_url); err != nil {
 		return nil, err
 	}
 
 	var picqerOrder []Model.PicqerOrder
-	json.Unmarshal(body, &picqerOrder)
+	if err := json.Unmarshal(c.HttpConnection.Result(), &picqerOrder); err != nil {
+		return nil, err
+	}
 
-	return picqerOrder, err
+	return picqerOrder, nil
 }
-*/
