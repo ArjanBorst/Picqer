@@ -3,55 +3,49 @@ package model
 // https://mholt.github.io/json-to-go/
 
 type PicqerOrder struct {
-	Idorder                   int    `json:"idorder"`
-	Idcustomer                int    `json:"idcustomer"`
-	Idtemplate                int    `json:"idtemplate,omitempty"`
-	IdshippingproviderProfile any    `json:"idshippingprovider_profile,omitempty"`
-	Orderid                   string `json:"orderid"`
-	Deliveryname              string `json:"deliveryname"`
-	Deliverycontactname       string `json:"deliverycontactname"`
-	Deliveryaddress           string `json:"deliveryaddress"`
-	Deliveryaddress2          any    `json:"deliveryaddress2"`
-	Deliveryzipcode           string `json:"deliveryzipcode"`
-	Deliverycity              string `json:"deliverycity"`
-	Deliveryregion            any    `json:"deliveryregion"`
-	Deliverycountry           string `json:"deliverycountry"`
-	FullDeliveryAddress       string `json:"full_delivery_address"`
-	Invoicename               string `json:"invoicename"`
-	Invoicecontactname        string `json:"invoicecontactname"`
-	Invoiceaddress            string `json:"invoiceaddress"`
-	Invoiceaddress2           any    `json:"invoiceaddress2"`
-	Invoicezipcode            string `json:"invoicezipcode"`
-	Invoicecity               string `json:"invoicecity"`
-	Invoiceregion             any    `json:"invoiceregion"`
-	Invoicecountry            string `json:"invoicecountry"`
-	FullInvoiceAddress        string `json:"full_invoice_address"`
-	Telephone                 any    `json:"telephone"`
-	Emailaddress              string `json:"emailaddress"`
-	Reference                 string `json:"reference"`
-	CustomerRemarks           any    `json:"customer_remarks"`
-	PickupPointData           any    `json:"pickup_point_data"`
-	Partialdelivery           bool   `json:"partialdelivery"`
-	AutoSplit                 bool   `json:"auto_split"`
-	Invoiced                  bool   `json:"invoiced"`
-	PreferredDeliveryDate     any    `json:"preferred_delivery_date"`
-	Discount                  int    `json:"discount"`
-	Calculatevat              bool   `json:"calculatevat"`
-	Language                  string `json:"language"`
-	Status                    string `json:"status"`
-	PublicStatusPage          string `json:"public_status_page"`
-	Created                   string `json:"created"`
-	Updated                   string `json:"updated"`
-	Warehouses                []int  `json:"warehouses"`
-	Tags                      []struct {
-		Idtag     int    `json:"idtag"`
-		Title     string `json:"title"`
-		Color     string `json:"color"`
-		Inherit   bool   `json:"inherit"`
-		TextColor string `json:"textColor"`
-	} `json:"Tags"`
-	Orderfields []Orderfield `json:"Orderfields"`
-	Products    []struct {
+	Idorder                   int            `json:"idorder"`
+	Idcustomer                int            `json:"idcustomer"`
+	Idtemplate                int            `json:"idtemplate,omitempty"`
+	IdshippingproviderProfile any            `json:"idshippingprovider_profile,omitempty"`
+	Orderid                   string         `json:"orderid"`
+	Deliveryname              string         `json:"deliveryname"`
+	Deliverycontactname       string         `json:"deliverycontactname"`
+	Deliveryaddress           string         `json:"deliveryaddress"`
+	Deliveryaddress2          any            `json:"deliveryaddress2"`
+	Deliveryzipcode           string         `json:"deliveryzipcode"`
+	Deliverycity              string         `json:"deliverycity"`
+	Deliveryregion            any            `json:"deliveryregion"`
+	Deliverycountry           string         `json:"deliverycountry"`
+	FullDeliveryAddress       string         `json:"full_delivery_address"`
+	Invoicename               string         `json:"invoicename"`
+	Invoicecontactname        string         `json:"invoicecontactname"`
+	Invoiceaddress            string         `json:"invoiceaddress"`
+	Invoiceaddress2           any            `json:"invoiceaddress2"`
+	Invoicezipcode            string         `json:"invoicezipcode"`
+	Invoicecity               string         `json:"invoicecity"`
+	Invoiceregion             any            `json:"invoiceregion"`
+	Invoicecountry            string         `json:"invoicecountry"`
+	FullInvoiceAddress        string         `json:"full_invoice_address"`
+	Telephone                 any            `json:"telephone"`
+	Emailaddress              string         `json:"emailaddress"`
+	Reference                 string         `json:"reference"`
+	CustomerRemarks           any            `json:"customer_remarks"`
+	PickupPointData           any            `json:"pickup_point_data"`
+	Partialdelivery           bool           `json:"partialdelivery"`
+	AutoSplit                 bool           `json:"auto_split"`
+	Invoiced                  bool           `json:"invoiced"`
+	PreferredDeliveryDate     any            `json:"preferred_delivery_date"`
+	Discount                  int            `json:"discount"`
+	Calculatevat              bool           `json:"calculatevat"`
+	Language                  string         `json:"language"`
+	Status                    string         `json:"status"`
+	PublicStatusPage          string         `json:"public_status_page"`
+	Created                   string         `json:"created"`
+	Updated                   string         `json:"updated"`
+	Warehouses                []int          `json:"warehouses"`
+	Tags                      map[string]Tag `json:"Tags"`
+	Orderfields               []Orderfield   `json:"Orderfields"`
+	Products                  []struct {
 		IdorderProduct       int     `json:"idorder_product"`
 		Idproduct            int     `json:"idproduct"`
 		Idvatgroup           int     `json:"idvatgroup"`
@@ -106,4 +100,12 @@ type Orderfield struct {
 	Idorderfield int    `json:"Idorderfield"`
 	Title        string `json:"Title"`
 	Value        string `json:"Value"`
+}
+
+type Tag struct {
+	Idtag     int    `json:"idtag"`
+	Title     string `json:"title"`
+	Color     string `json:"color"`
+	Inherit   bool   `json:"inherit"`
+	TextColor string `json:"textColor"`
 }

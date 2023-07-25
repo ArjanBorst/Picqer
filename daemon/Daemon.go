@@ -1,16 +1,12 @@
 package daemon
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
 	"strconv"
 	"sync"
 	"time"
 
+	"github.com/arjanborst/core/helpers"
 	"github.com/arjanborst/picqer"
 	model "github.com/arjanborst/picqer/Model"
 )
@@ -32,9 +28,14 @@ func (c PicqerDaemon) Start() {
 	quit := make(chan struct{})
 
 	mux.Lock()
-	_ = c.loadDataFromFile()
+	_ = helpers.LoadDataFromFile(c.DataPath, "orders.json", &c.Orders)
+	_ = helpers.LoadDataFromFile(c.DataPath, "shipments.json", &c.Shipments)
 	c.GetOrders(c.FirstLoadPages)
+	c.GetShipments()
 	mux.Unlock()
+
+	helpers.SaveDataToFile(c.DataPath, "orders.json", &c.Orders)
+	helpers.SaveDataToFile(c.DataPath, "shipments.json", &c.Shipments)
 
 	for {
 		select {
@@ -45,7 +46,8 @@ func (c PicqerDaemon) Start() {
 			c.GetShipments()
 			mux.Unlock()
 
-			c.saveDataToFile()
+			helpers.SaveDataToFile(c.DataPath, "orders.json", &c.Orders)
+			helpers.SaveDataToFile(c.DataPath, "shipments.json", &c.Shipments)
 
 		case <-quit:
 			ticker.Stop()
@@ -55,6 +57,9 @@ func (c PicqerDaemon) Start() {
 }
 
 func (c PicqerDaemon) GetShipments() {
+	if c.Debug {
+		log.Println("Start Checking for new Shipments.")
+	}
 
 	for _, order := range c.Orders {
 
@@ -66,11 +71,15 @@ func (c PicqerDaemon) GetShipments() {
 			}
 		}
 	}
+
+	if c.Debug {
+		log.Println("End Checking for new Shipments.")
+	}
 }
 
 func (c PicqerDaemon) GetOrders(pages int) {
 	if c.Debug {
-		fmt.Println("Start Checking for new orders.")
+		log.Println("Start Checking for new orders.")
 	}
 
 	for i := 0; i < pages; i++ {
@@ -81,71 +90,6 @@ func (c PicqerDaemon) GetOrders(pages int) {
 	}
 
 	if c.Debug {
-		fmt.Println("End Checking for new orders (" + strconv.Itoa(len(c.Orders)) + ").")
+		log.Println("End Checking for new orders (" + strconv.Itoa(len(c.Orders)) + ").")
 	}
-}
-
-func (c PicqerDaemon) loadDataFromFile() error {
-	if c.Debug {
-		log.Println("Start reading orders from file")
-	}
-
-	filename := c.DataPath + "orders.json"
-
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		if c.Debug {
-			log.Println("No existing file. Creating a new one.")
-		}
-
-		file, err := os.Create(filename)
-		if err != nil {
-			return errors.New("ERROR CREATING NEW FILE")
-		}
-		defer file.Close()
-
-		// Exit function because nothing more to load.
-		return nil
-	} else if err != nil {
-		return errors.New("Error accessing the file")
-	}
-
-	file, err := os.Open(filename)
-	if err != nil {
-		return errors.New("Error loading Data from file")
-	}
-
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		return errors.New("Error reading Data from file")
-	}
-
-	err = json.Unmarshal(data, &c.Orders)
-	if err != nil {
-		return errors.New("Error unmarshalling JSON")
-	}
-
-	if c.Debug {
-		log.Println("Loaded a total of " + strconv.Itoa(len(c.Orders)) + " orders")
-	}
-
-	return nil
-}
-
-func (c PicqerDaemon) saveDataToFile() {
-	jsonData, err := json.Marshal(c.Orders)
-	if err != nil {
-		println("Error while saving picqer orders to file. Problem while convert object to JSON format")
-		panic(err)
-	}
-
-	jsonFile, err := os.Create(c.DataPath + "orders.json")
-	if err != nil {
-		println("Error while saving picqer orders to file. Error while creating file or truncating file")
-		panic(err)
-	}
-	defer jsonFile.Close()
-
-	jsonFile.Write(jsonData)
-
-	fmt.Println("Saved orders to file: " + c.DataPath + "orders.json")
 }
