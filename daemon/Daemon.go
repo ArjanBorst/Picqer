@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"sync"
@@ -11,31 +12,45 @@ import (
 	model "github.com/arjanborst/picqer/Model"
 )
 
+type shipmentTracker struct {
+	LastChecked time.Time `json:"lastchecked"`
+	LastUpdated time.Time `json:"lastupdated"`
+	Created     time.Time `json:"created"`
+	IdOrder     int       `json:"idorder"`
+	IdPicklist  int       `json:"idpicklist"`
+	IdShipment  int       `json:"idshipment"`
+}
+
 type PicqerDaemon struct {
-	Pages          int
-	FirstLoadPages int
-	DataPath       string
-	Orders         map[int]model.PicqerOrder
-	Shipments      map[int]model.Shipment
-	Debug          bool
-	API            *picqer.PicqerHttpConnection
+	Pages           int
+	FirstLoadPages  int
+	DataPath        string
+	Orders          map[int]model.PicqerOrder
+	Shipments       map[int]model.Shipment
+	Debug           bool
+	API             *picqer.PicqerHttpConnection
+	ShipmentTracker map[int]shipmentTracker
 }
 
 var mux = &sync.RWMutex{}
 
 func (c PicqerDaemon) Start() {
-	ticker := time.NewTicker(120 * time.Second)
+	ticker := time.NewTicker(60 * time.Second)
 	quit := make(chan struct{})
+
+	c.ShipmentTracker = make(map[int]shipmentTracker)
 
 	mux.Lock()
 	_ = helpers.LoadDataFromFile(c.DataPath, "orders.json", &c.Orders)
 	_ = helpers.LoadDataFromFile(c.DataPath, "shipments.json", &c.Shipments)
+	_ = helpers.LoadDataFromFile(c.DataPath, "shipmenttracker.json", &c.ShipmentTracker)
 	c.GetOrders(c.FirstLoadPages)
 	c.GetShipments()
 	mux.Unlock()
 
 	helpers.SaveDataToFile(c.DataPath, "orders.json", &c.Orders)
 	helpers.SaveDataToFile(c.DataPath, "shipments.json", &c.Shipments)
+	helpers.SaveDataToFile(c.DataPath, "shipmenttracker.json", &c.ShipmentTracker)
 
 	for {
 		select {
@@ -48,6 +63,7 @@ func (c PicqerDaemon) Start() {
 
 			helpers.SaveDataToFile(c.DataPath, "orders.json", &c.Orders)
 			helpers.SaveDataToFile(c.DataPath, "shipments.json", &c.Shipments)
+			helpers.SaveDataToFile(c.DataPath, "shipmenttracker.json", &c.ShipmentTracker)
 
 		case <-quit:
 			ticker.Stop()
@@ -65,9 +81,44 @@ func (c PicqerDaemon) GetShipments() {
 
 		for _, picklist := range order.Picklists {
 
-			shipments, _ := c.API.GetShipments(picklist.Idpicklist)
-			for _, shipment := range shipments {
-				c.Shipments[shipment.Idshipment] = shipment
+			if t, trackerExist := c.ShipmentTracker[picklist.Idpicklist]; trackerExist {
+
+				currentTime := time.Now()
+				duration := currentTime.Sub(t.LastUpdated)
+
+				if c.Debug {
+					fmt.Println(duration.Minutes())
+				}
+
+				if t.IdShipment == 0 && duration.Minutes() >= 4 {
+
+					shipments, _ := c.API.GetShipments(picklist.Idpicklist)
+					for _, shipment := range shipments {
+
+						c.Shipments[shipment.Idshipment] = shipment
+
+						c.ShipmentTracker[shipment.Idpicklist] = shipmentTracker{
+							LastChecked: time.Now(),
+							LastUpdated: time.Now(),
+							IdShipment:  shipment.Idshipment,
+						}
+					}
+				}
+
+			} else {
+
+				if c.Debug {
+					log.Println("Add entry to ShipmentTracker.")
+				}
+
+				c.ShipmentTracker[picklist.Idpicklist] = shipmentTracker{
+					LastChecked: time.Now(),
+					LastUpdated: time.Now(),
+					Created:     time.Now(),
+					IdOrder:     picklist.Idorder,
+					IdPicklist:  picklist.Idpicklist,
+					IdShipment:  0,
+				}
 			}
 		}
 	}
